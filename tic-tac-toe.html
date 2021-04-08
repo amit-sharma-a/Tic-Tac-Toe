@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+    <script src="script.js"></script>
+    <style>
+        body {
+            margin: 100px;
+            margin-left: 200px;
+            /* border: solid red 2px; */
+        }
+        
+        .wrapper {
+            display: grid;
+            grid-template-columns: 100px 100px 100px;
+            grid-template-rows: 100px 100px 100px;
+            /* grid-gap: 10px; */
+            background-color: #fff;
+            color: #444;
+            /* border: solid red 2px; */
+        }
+        
+        .box {
+            background-color: #444;
+            color: #fff;
+            /* border-radius: 5px; */
+            border: red 2px solid;
+            padding: 20px;
+            font-size: 150%;
+        }
+        
+        #p1 {
+            margin-left: 60px;
+            font-size: 150%;
+            color: blue;
+        }
+    </style>
+</head>
+
+<body>
+
+    <p id="p1">First Player</p>
+
+    <div class="wrapper">
+        <div class="box a" id="a"></div>
+        <div class="box b" id="b"></div>
+        <div class="box c" id="c"></div>
+        <div class="box d" id="d"></div>
+        <div class="box e" id="e"></div>
+        <div class="box f" id="f"></div>
+        <div class="box f" id="g"></div>
+        <div class="box f" id="h"></div>
+        <div class="box f" id="e"></div>
+    </div>
+
+    <script>
+        let a = 0;
+        let x = document.getElementsByClassName("box");
+
+        let pos = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        function end() {
+            let c = 0;
+            for (let i = 0; i < 3; i++) {
+                let c1 = 0;
+                let c2 = 0;
+
+                for (let j = i; j < 9; j += 3) {
+                    c1 += (pos[j] == 1);
+                    c2 += (pos[j] == -1);
+                    c += (pos[j] == 0);
+                }
+                if (c1 == 3)
+                    return 1;
+                if (c2 == 3)
+                    return -1;
+            }
+
+            for (let i = 0; i < 9; i += 3) {
+                let c1 = 0;
+                let c2 = 0;
+                for (let j = i; j < i + 3; j++) {
+                    c1 += (pos[j] == 1);
+                    c2 += (pos[j] == -1);
+                }
+                if (c1 == 3)
+                    return 1;
+                if (c2 == 3)
+                    return -1;
+            }
+
+            if ((pos[0] == 1 && pos[4] == 1 && pos[8] == 1) || (pos[4] == 1 && pos[2] == 1 && pos[6] == 1))
+                return 1;
+            if ((pos[0] == -1 && pos[4] == -1 && pos[8] == -1) || (pos[4] == -1 && pos[2] == -1 && pos[6] == -1))
+                return -1;
+
+            if (c == 0)
+                return 0;
+            return 2;
+
+
+        }
+
+        function next() {
+            if (end() != 2) {
+                // console.log(end());
+                return end();
+            }
+            if (a == 1) {
+                let t = 5;
+                for (let i = 0; i < 9; i++) {
+                    if (pos[i] == 0) {
+                        pos[i] = -1;
+                        a = 0;
+                        let t1 = next();
+                        if (t > t1) {
+                            t = t1;
+                        }
+                        a = 1;
+                        pos[i] = 0;
+                    }
+                }
+                return (t);
+            } else {
+                let t = -5;
+                for (let i = 0; i < 9; i++) {
+                    if (pos[i] == 0) {
+                        pos[i] = 1;
+                        a = 1;
+                        let t1 = next();
+                        if (t < t1) {
+                            t = t1;
+                        }
+                        a = 0;
+                        pos[i] = 0;
+                    }
+                }
+                return (t);
+            }
+        }
+
+        let best;
+
+        function ai() {
+            let bestmove, val = 5;
+            for (let i = 0; i < 9; i++) {
+                if (pos[i] == 0) {
+                    pos[i] = -1;
+                    a = 0;
+                    let t = next();
+                    a = 1;
+                    pos[i] = 0;
+                    // console.log(i, t);
+                    if (val > t) {
+                        val = t;
+                        bestmove = i;
+                    }
+                }
+            }
+
+            pos[bestmove] = -1;
+            best = bestmove;
+            // return (bestmove);
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function change(p) {
+            if (pos[p] != 0)
+                return;
+            pos[p] = 1;
+            a = 1;
+            document.getElementById("p1").innerHTML = "AI IS Thinking";
+
+
+            x[p].innerHTML = "X";
+
+            if (end() == 1) {
+                document.getElementById("p1").innerHTML = "You Won";
+                return;
+            } else if (end() == -1) {
+                document.getElementById("p1").innerHTML = "AI Won";
+                return;
+            } else if (end() == 0) {
+                document.getElementById("p1").innerHTML = "Match Draw";
+                return;
+            }
+
+
+            ai();
+            p = best;
+
+            for (let i = 0; i < 9; i++) {
+                // console.log(pos[i]);
+                if (pos[i] == 1) {
+                    x[i].innerHTML = "X";
+                } else if (pos[i] == -1) {
+                    x[i].innerHTML = "O";
+                }
+            }
+
+
+            // x[p].innerHTML = "O";
+            // console.log(p);
+
+            if (end() == 1) {
+                document.getElementById("p1").innerHTML = "You Won";
+                return;
+            } else if (end() == -1) {
+                document.getElementById("p1").innerHTML = "You Won";
+                return;
+            } else if (end() == 0) {
+                document.getElementById("p1").innerHTML = "Match Draw";
+                return;
+            }
+            document.getElementById("p1").innerHTML = "Play your Move";
+        }
+
+        // for (var i = 0; i < x.length; i++) {
+        //     x[i].innerHTML = i;
+        // }
+        document.getElementById("p1").innerHTML = "Play your Move";
+        x[0].addEventListener("click", () => {
+            change(0);
+        });
+        x[1].addEventListener("click", () => {
+            change(1);
+        });
+        x[2].addEventListener("click", () => {
+            change(2);
+        });
+        x[3].addEventListener("click", () => {
+            change(3);
+        });
+        x[4].addEventListener("click", () => {
+            change(4);
+        });
+        x[5].addEventListener("click", () => {
+            change(5);
+        });
+        x[6].addEventListener("click", () => {
+            change(6);
+        });
+        x[7].addEventListener("click", () => {
+
+            change(7);
+        });
+        x[8].addEventListener("click", () => {
+            change(8);
+        });
+    </script>
+
+</body>
+
+</html>
